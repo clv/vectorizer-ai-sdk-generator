@@ -149,8 +149,10 @@ function PostProcess-Sdk($Language, $Output) {
                 @{ From = "<url>https://vectorizer.ai/policies/terms</url>"; To = "<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>" }
             )
             Update-TextFile (Join-Path $Output "build.gradle") @(
-                @{ From = "version = '1.0.0'"; To = "version = '$Version'" }
+                @{ From = "version = '1.0.0'"; To = "version = '$Version'" },
+                @{ From = "targetCompatibility = JavaVersion.VERSION_11"; To = "targetCompatibility = JavaVersion.VERSION_11`n`njava {`n    withSourcesJar()`n    withJavadocJar()`n}" }
             )
+            Update-TextFileRegex (Join-Path $Output "build.gradle") "(?s)`ntasks\.register\('sourcesJar', Jar\) \{.*?artifacts \{\s+archives tasks\.named\('sourcesJar'\)\s+archives tasks\.named\('javadocJar'\)\s+\}\s+" "`n"
             Update-TextFile (Join-Path $Output "README.md") @(
                 @{ From = "<version>1.0.0</version>"; To = "<version>$Version</version>" },
                 @{ From = "ai.vectorizer:vectorizer-ai-java:1.0.0"; To = "ai.vectorizer:vectorizer-ai-java:$Version" },
