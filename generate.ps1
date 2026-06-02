@@ -143,6 +143,7 @@ function PostProcess-Sdk($Language, $Output) {
             $Composer.name = "vectorizer/ai"
             $Composer.description = "Official PHP SDK for the Vectorizer.AI image vectorization API."
             $Composer.license = "Apache-2.0"
+            $Composer.PSObject.Properties.Remove("version")
             Write-JsonFile $ComposerJson $Composer
         }
         "csharp" {
