@@ -1,0 +1,58 @@
+{
+  "name": "Vectorizer.AI SDKs",
+  "openapi": "https://vectorizer.ai/api/openapi.json",
+  "server": "https://api.vectorizer.ai/api/v1",
+  "generator": "openapi-generator-cli 7.6.0",
+  "version": "1.0.0",
+  "languages": [
+    {
+      "id": "python",
+      "label": "Python",
+      "package": "vectorizer-ai",
+      "install": "pip install vectorizer-ai",
+      "output": "output/python"
+    },
+    {
+      "id": "typescript",
+      "label": "TypeScript / JavaScript",
+      "package": "@vectorizer-ai/sdk",
+      "install": "npm install @vectorizer-ai/sdk",
+      "output": "output/typescript"
+    },
+    {
+      "id": "java",
+      "label": "Java",
+      "package": "ai.vectorizer:vectorizer-ai-java",
+      "install": "Maven or Gradle dependency ai.vectorizer:vectorizer-ai-java:1.0.0",
+      "output": "output/java"
+    },
+    {
+      "id": "csharp",
+      "label": "C# / .NET",
+      "package": "Vectorizer.AI",
+      "install": "dotnet add package Vectorizer.AI",
+      "output": "output/csharp"
+    },
+    {
+      "id": "go",
+      "label": "Go",
+      "package": "github.com/clv/vectorizer-go",
+      "install": "go get github.com/clv/vectorizer-go",
+      "output": "output/go"
+    },
+    {
+      "id": "php",
+      "label": "PHP",
+      "package": "vectorizer/ai",
+      "install": "composer require vectorizer/ai",
+      "output": "output/php"
+    },
+    {
+      "id": "ruby",
+      "label": "Ruby",
+      "package": "vectorizer_ai",
+      "install": "gem install vectorizer_ai",
+      "output": "output/ruby"
+    }
+  ]
+}

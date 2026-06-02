@@ -1,0 +1,9 @@
+npmName: "@vectorizer-ai/sdk"
+npmRepository: https://registry.npmjs.org/
+npmVersion: 1.0.0
+supportsES6: true
+withInterfaces: true
+useSingleRequestParameter: true
+gitUserId: clv
+gitRepoId: vectorizer-ai-js
+hideGenerationTimestamp: true

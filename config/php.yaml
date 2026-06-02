@@ -1,0 +1,10 @@
+invokerPackage: VectorizerAI
+packageName: VectorizerAI
+artifactVersion: 1.0.0
+composerPackageName: vectorizer/ai
+artifactUrl: https://github.com/clv/vectorizer-ai-php
+developerOrganization: Vectorizer.AI
+developerOrganizationUrl: https://vectorizer.ai
+gitUserId: clv
+gitRepoId: vectorizer-ai-php
+hideGenerationTimestamp: true

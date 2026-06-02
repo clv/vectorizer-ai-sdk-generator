@@ -1,0 +1,1362 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Vectorizer.AI API",
+    "version" : "1.0.0",
+    "description" : "OpenAPI 3.0 specification for the Vectorizer.AI image vectorization API. Authenticate with HTTP Basic auth, using your API Id as the username and your API Secret as the password.",
+    "termsOfService" : "https://vectorizer.ai/policies/terms",
+    "contact" : {
+      "name" : "Vectorizer.AI Support",
+      "url" : "https://vectorizer.ai/support",
+      "email" : "support@vectorizer.ai"
+    },
+    "license" : {
+      "name" : "Proprietary",
+      "url" : "https://vectorizer.ai/policies/terms"
+    }
+  },
+  "servers" : [ {
+    "url" : "https://api.vectorizer.ai/api/v1",
+    "description" : "Vectorizer.AI API v1 endpoint"
+  } ],
+  "tags" : [ {
+    "name" : "vectorization",
+    "description" : "Vectorize images, download retained results, and delete retained images."
+  }, {
+    "name" : "account",
+    "description" : "Account status and API credit information."
+  } ],
+  "paths" : {
+    "/vectorize" : {
+      "post" : {
+        "summary" : "Vectorize an image",
+        "description" : "Submit exactly one image source as multipart form data: image, image.url, image.base64, or image.token. The response body is the generated SVG, EPS, PDF, DXF, or PNG file selected by output.file_format. Clients should allow an idle timeout of at least 180 seconds.",
+        "operationId" : "postVectorize",
+        "tags" : [ "vectorization" ],
+        "x-group-parameters" : true,
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VectorizeRequest"
+              },
+              "encoding" : {
+                "image" : {
+                  "contentType" : "image/png, image/jpeg, image/webp, image/gif, image/bmp, image/tiff"
+                }
+              }
+            }
+          },
+          "description" : "Multipart form body. Dotted property names are literal form field names."
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The vectorized image file.",
+            "content" : {
+              "image/svg+xml" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/postscript" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/dxf" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "image/png" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            },
+            "headers" : {
+              "Content-Disposition" : {
+                "description" : "Suggested filename for the generated result.",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Content-Encoding" : {
+                "description" : "May be gzip for SVG, EPS, or DXF responses when the request allows gzip encoding.",
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ "gzip" ]
+                }
+              },
+              "X-Image-Token" : {
+                "description" : "Returned by vectorize when policy.retention_days is greater than 0.",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "X-Credits-Charged" : {
+                "description" : "Credits charged for the request. This is 0 for test requests.",
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              },
+              "X-Credits-Calculated" : {
+                "description" : "Returned for test requests to show the credits that would have been charged for the equivalent non-test request.",
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request parameters, image input, URL fetch, or Image Token.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid API credentials.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "WWW-Authenticate" : {
+                "description" : "HTTP Basic authentication challenge returned with 401 responses.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "402" : {
+            "description" : "The account does not have an API subscription, is past due, or is out of credits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "The uploaded image, fetched image, or requested PNG output is too large.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "Rate limit exceeded. Back off before retrying.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unexpected internal error.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Temporary overload or internal processing timeout. Retry later.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/download" : {
+      "post" : {
+        "summary" : "Download a retained result",
+        "description" : "Download a production result from a retained Image Token, optionally changing output.file_format and other output options. Include receipt when downloading additional formats after upgrading a preview result.",
+        "operationId" : "postDownload",
+        "tags" : [ "vectorization" ],
+        "x-group-parameters" : true,
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DownloadRequest"
+              }
+            }
+          },
+          "description" : "Multipart form body. The image.token field is required."
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The requested output file.",
+            "content" : {
+              "image/svg+xml" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/postscript" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "application/dxf" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "image/png" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            },
+            "headers" : {
+              "Content-Disposition" : {
+                "description" : "Suggested filename for the generated result.",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Content-Encoding" : {
+                "description" : "May be gzip for SVG, EPS, or DXF responses when the request allows gzip encoding.",
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ "gzip" ]
+                }
+              },
+              "X-Receipt" : {
+                "description" : "Returned when a preview Image Token is upgraded to a production result; use it for discounted additional format downloads.",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "X-Credits-Charged" : {
+                "description" : "Credits charged for the request. This is 0 for test requests.",
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              },
+              "X-Credits-Calculated" : {
+                "description" : "Returned for test requests to show the credits that would have been charged for the equivalent non-test request.",
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request parameters, image input, URL fetch, or Image Token.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid API credentials.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "WWW-Authenticate" : {
+                "description" : "HTTP Basic authentication challenge returned with 401 responses.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "402" : {
+            "description" : "The account does not have an API subscription, is past due, or is out of credits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "The uploaded image, fetched image, or requested PNG output is too large.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "Rate limit exceeded. Back off before retrying.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unexpected internal error.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Temporary overload or internal processing timeout. Retry later.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delete" : {
+      "post" : {
+        "summary" : "Delete a retained image",
+        "description" : "Delete a retained image and result before its retention period expires.",
+        "operationId" : "postDelete",
+        "tags" : [ "vectorization" ],
+        "x-group-parameters" : true,
+        "requestBody" : {
+          "required" : true,
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteImageRequest"
+              }
+            }
+          },
+          "description" : "Multipart form body. The image.token field is required."
+        },
+        "responses" : {
+          "200" : {
+            "description" : "The Image Token was deleted.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteImageResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request parameters, image input, URL fetch, or Image Token.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid API credentials.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "WWW-Authenticate" : {
+                "description" : "HTTP Basic authentication challenge returned with 401 responses.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "402" : {
+            "description" : "The account does not have an API subscription, is past due, or is out of credits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "The uploaded image, fetched image, or requested PNG output is too large.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "Rate limit exceeded. Back off before retrying.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unexpected internal error.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Temporary overload or internal processing timeout. Retry later.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account" : {
+      "get" : {
+        "summary" : "Get account status",
+        "description" : "Fetch the subscription state and remaining API credits for the authenticated account.",
+        "operationId" : "getAccountStatus",
+        "tags" : [ "account" ],
+        "x-group-parameters" : true,
+        "responses" : {
+          "200" : {
+            "description" : "Account status for the authenticated API credentials.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccountStatusResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request parameters, image input, URL fetch, or Image Token.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid API credentials.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "WWW-Authenticate" : {
+                "description" : "HTTP Basic authentication challenge returned with 401 responses.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "402" : {
+            "description" : "The account does not have an API subscription, is past due, or is out of credits.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "The uploaded image, fetched image, or requested PNG output is too large.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "Rate limit exceeded. Back off before retrying.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unexpected internal error.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Temporary overload or internal processing timeout. Retry later.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers" : {
+              "Retry-After" : {
+                "description" : "Number of seconds to wait before retrying, when provided.",
+                "schema" : {
+                  "type" : "integer",
+                  "format" : "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "VectorizeRequest" : {
+        "type" : "object",
+        "description" : "Multipart form fields for vectorizing an image. Field names containing dots are literal form field names.",
+        "additionalProperties" : false,
+        "properties" : {
+          "image" : {
+            "type" : "string",
+            "format" : "binary",
+            "description" : "Binary file upload of the image to vectorize. Accepts .bmp, .gif, .jpeg, .png, or .tiff files."
+          },
+          "image.url" : {
+            "type" : "string",
+            "description" : "URL to fetch the input image from for vectorization.",
+            "format" : "uri"
+          },
+          "image.base64" : {
+            "type" : "string",
+            "description" : "Base64-encoded string of the input image. Maximum size 1 megabyte.",
+            "format" : "byte"
+          },
+          "image.token" : {
+            "type" : "string",
+            "description" : "An Image Token returned from an earlier vectorization call with policy.retention_days > 0."
+          },
+          "mode" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "production", "preview", "test", "test_preview" ],
+            "description" : "Mode of operation, useful during integration work.",
+            "default" : "production"
+          },
+          "input.max_pixels" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 100,
+            "maximum" : 3145828,
+            "description" : "Maximum input image size (width × height in pixels) before resizing.",
+            "default" : 2097252
+          },
+          "policy.retention_days" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0,
+            "maximum" : 30,
+            "description" : "Number of days to retain the uploaded image and its results for re-use.",
+            "default" : 0
+          },
+          "processing.max_colors" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0,
+            "maximum" : 256,
+            "description" : "Maximum number of colors allowed in the vectorization result. 0 means unlimited.",
+            "default" : 0
+          },
+          "processing.shapes.min_area_px" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 100,
+            "description" : "Minimum shape area (in pixels) to keep in the result; smaller shapes are discarded.",
+            "default" : 0.125
+          },
+          "processing.palette" : {
+            "type" : "string",
+            "description" : "Palette remapping and color control, using '[color][-> remapped][~ tolerance];' format.",
+            "example" : "#FF0000;#00FF00;#0000FF;"
+          },
+          "processing.color_profile.input" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "ignore", "preserve" ],
+            "description" : "How to handle ICC profiles embedded in input images.",
+            "default" : "ignore"
+          },
+          "processing.color_profile.output" : {
+            "type" : "string",
+            "description" : "ICC profile behavior for output files: preserve, ignore.",
+            "default" : "ignore"
+          },
+          "processing.parameterizedShapes.ellipse.general.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.ellipse.circle.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.triangle.general.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.triangle.isosceles.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.quadrilateral.general.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.quadrilateral.rectangle.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.quadrilateral.bullet.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.star.N3.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.star.N4.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.star.N5.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "processing.parameterizedShapes.star.N6.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable detection and parameterization of this parameterized shape type.",
+            "default" : true
+          },
+          "output.file_format" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "svg", "eps", "pdf", "dxf", "png" ],
+            "description" : "Output file format to generate.",
+            "default" : "svg"
+          },
+          "output.shape_stacking" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "cutouts", "stacked" ],
+            "description" : "Whether shapes are cut out of each other or stacked atop each other.",
+            "default" : "cutouts"
+          },
+          "output.group_by" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "none", "color", "parent", "layer" ],
+            "description" : "Grouping of shapes in output.",
+            "default" : "none"
+          },
+          "output.draw_style" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "fill_shapes", "stroke_shapes", "stroke_edges" ],
+            "description" : "How shapes are rendered.",
+            "default" : "fill_shapes"
+          },
+          "output.strokes.stroke_width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 5,
+            "description" : "Width of stroke for shape outlines (when enabled).",
+            "default" : 1
+          },
+          "output.strokes.non_scaling_stroke" : {
+            "type" : "boolean",
+            "description" : "Use non-scaling strokes when drawing shape outlines.",
+            "default" : true
+          },
+          "output.strokes.use_override_color" : {
+            "type" : "boolean",
+            "description" : "Override shape color with a specific color.",
+            "default" : false
+          },
+          "output.strokes.override_color" : {
+            "type" : "string",
+            "description" : "Color value to override shape stroke color if enabled. Must be in '#RRGGBB' or 'rgba(r,g,b,a)' format.",
+            "default" : "#000000",
+            "example" : "#FF00FF"
+          },
+          "output.gap_filler.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable filling small visual gaps caused by vector rendering artifacts.",
+            "default" : true
+          },
+          "output.gap_filler.non_scaling_stroke" : {
+            "type" : "boolean",
+            "description" : "Use non-scaling strokes for gap filling.",
+            "default" : true
+          },
+          "output.gap_filler.clip" : {
+            "type" : "boolean",
+            "description" : "Clip gap filler strokes to shape bounds when stacking shapes.",
+            "default" : false
+          },
+          "output.gap_filler.stroke_width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 5,
+            "description" : "Width of the gap filler strokes (in output units).",
+            "default" : 2
+          },
+          "output.parameterized_shapes.flatten" : {
+            "type" : "boolean",
+            "description" : "Whether to flatten detected circles, rectangles, and stars to curves.",
+            "default" : false
+          },
+          "output.curves.line_fit_tolerance" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0.001,
+            "maximum" : 1,
+            "description" : "Maximum allowed error when approximating curves with line segments.",
+            "default" : 0.1
+          },
+          "output.curves.allowed.quadratic_bezier" : {
+            "type" : "boolean",
+            "description" : "Allow quadratic Bézier curves in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.cubic_bezier" : {
+            "type" : "boolean",
+            "description" : "Allow cubic Bézier curves in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.circular_arc" : {
+            "type" : "boolean",
+            "description" : "Allow circular arcs in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.elliptical_arc" : {
+            "type" : "boolean",
+            "description" : "Allow elliptical arcs in the output.",
+            "default" : true
+          },
+          "output.svg.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "svg_1_0", "svg_1_1", "svg_tiny_1_2" ],
+            "description" : "SVG version to declare in the SVG output.",
+            "default" : "svg_1_1"
+          },
+          "output.svg.fixed_size" : {
+            "type" : "boolean",
+            "description" : "Whether to fix the SVG dimensions in the output file.",
+            "default" : false
+          },
+          "output.svg.adobe_compatibility_mode" : {
+            "type" : "boolean",
+            "description" : "Enable Illustrator compatibility by disabling unsupported SVG features.",
+            "default" : false
+          },
+          "output.pdf.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "PDF_1_4" ],
+            "description" : "PDF version to generate for PDF output.",
+            "default" : "PDF_1_4"
+          },
+          "output.pdf.compression_mode" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "None", "Deflate" ],
+            "description" : "Compression method to apply to PDF output streams.",
+            "default" : "Deflate"
+          },
+          "output.eps.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "PS_3_0_EPSF_3_0" ],
+            "description" : "EPS format version for EPS output.",
+            "default" : "PS_3_0_EPSF_3_0"
+          },
+          "output.dxf.compatibility_level" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "lines_only", "lines_and_arcs", "lines_arcs_and_splines" ],
+            "description" : "Level of primitive support for DXF output.",
+            "default" : "lines_and_arcs"
+          },
+          "output.bitmap.anti_aliasing_mode" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "anti_aliased", "aliased" ],
+            "description" : "Anti-aliasing mode for bitmap (PNG) output.",
+            "default" : "anti_aliased"
+          },
+          "output.size.scale" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000,
+            "description" : "Overall uniform scaling factor for the output image.",
+            "example" : 1
+          },
+          "output.size.width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000000000000,
+            "description" : "Output width, in the selected unit (see output.size.unit).",
+            "example" : 100
+          },
+          "output.size.height" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000000000000,
+            "description" : "Output height, in the selected unit (see output.size.unit).",
+            "example" : 100
+          },
+          "output.size.unit" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "none", "px", "pt", "in", "cm", "mm" ],
+            "description" : "Measurement unit for output dimensions.",
+            "default" : "none"
+          },
+          "output.size.aspect_ratio" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "preserve_inset", "preserve_overflow", "stretch" ],
+            "description" : "How to preserve or stretch aspect ratio.",
+            "default" : "preserve_inset"
+          },
+          "output.size.align_x" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1,
+            "description" : "Horizontal alignment (0.0 = left, 0.5 = center, 1.0 = right) when aspect ratio is preserved.",
+            "default" : 0.5
+          },
+          "output.size.align_y" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1,
+            "description" : "Vertical alignment (0.0 = top, 0.5 = center, 1.0 = bottom) when aspect ratio is preserved.",
+            "default" : 0.5
+          },
+          "output.size.input_dpi" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 1,
+            "maximum" : 1000000,
+            "description" : "Override the detected DPI of the input image for size computations.",
+            "example" : 300
+          },
+          "output.size.output_dpi" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 1,
+            "maximum" : 1000000,
+            "description" : "DPI setting for the output image.",
+            "example" : 300
+          }
+        },
+        "oneOf" : [ {
+          "required" : [ "image" ]
+        }, {
+          "required" : [ "image.url" ]
+        }, {
+          "required" : [ "image.base64" ]
+        }, {
+          "required" : [ "image.token" ]
+        } ]
+      },
+      "DownloadRequest" : {
+        "type" : "object",
+        "description" : "Multipart form fields for downloading a retained result. The image.token field is required.",
+        "additionalProperties" : false,
+        "properties" : {
+          "image.token" : {
+            "type" : "string",
+            "description" : "Image Token returned from a vectorize request with policy.retention_days > 0."
+          },
+          "receipt" : {
+            "type" : "string",
+            "description" : "Receipt returned in the X-Receipt response header when upgrading a preview result to production. Include it when downloading additional formats from that upgraded preview."
+          },
+          "output.file_format" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "svg", "eps", "pdf", "dxf", "png" ],
+            "description" : "Output file format to generate.",
+            "default" : "svg"
+          },
+          "output.shape_stacking" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "cutouts", "stacked" ],
+            "description" : "Whether shapes are cut out of each other or stacked atop each other.",
+            "default" : "cutouts"
+          },
+          "output.group_by" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "none", "color", "parent", "layer" ],
+            "description" : "Grouping of shapes in output.",
+            "default" : "none"
+          },
+          "output.draw_style" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "fill_shapes", "stroke_shapes", "stroke_edges" ],
+            "description" : "How shapes are rendered.",
+            "default" : "fill_shapes"
+          },
+          "output.strokes.stroke_width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 5,
+            "description" : "Width of stroke for shape outlines (when enabled).",
+            "default" : 1
+          },
+          "output.strokes.non_scaling_stroke" : {
+            "type" : "boolean",
+            "description" : "Use non-scaling strokes when drawing shape outlines.",
+            "default" : true
+          },
+          "output.strokes.use_override_color" : {
+            "type" : "boolean",
+            "description" : "Override shape color with a specific color.",
+            "default" : false
+          },
+          "output.strokes.override_color" : {
+            "type" : "string",
+            "description" : "Color value to override shape stroke color if enabled. Must be in '#RRGGBB' or 'rgba(r,g,b,a)' format.",
+            "default" : "#000000",
+            "example" : "#FF00FF"
+          },
+          "output.gap_filler.enabled" : {
+            "type" : "boolean",
+            "description" : "Enable filling small visual gaps caused by vector rendering artifacts.",
+            "default" : true
+          },
+          "output.gap_filler.non_scaling_stroke" : {
+            "type" : "boolean",
+            "description" : "Use non-scaling strokes for gap filling.",
+            "default" : true
+          },
+          "output.gap_filler.clip" : {
+            "type" : "boolean",
+            "description" : "Clip gap filler strokes to shape bounds when stacking shapes.",
+            "default" : false
+          },
+          "output.gap_filler.stroke_width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 5,
+            "description" : "Width of the gap filler strokes (in output units).",
+            "default" : 2
+          },
+          "output.parameterized_shapes.flatten" : {
+            "type" : "boolean",
+            "description" : "Whether to flatten detected circles, rectangles, and stars to curves.",
+            "default" : false
+          },
+          "output.curves.line_fit_tolerance" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0.001,
+            "maximum" : 1,
+            "description" : "Maximum allowed error when approximating curves with line segments.",
+            "default" : 0.1
+          },
+          "output.curves.allowed.quadratic_bezier" : {
+            "type" : "boolean",
+            "description" : "Allow quadratic Bézier curves in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.cubic_bezier" : {
+            "type" : "boolean",
+            "description" : "Allow cubic Bézier curves in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.circular_arc" : {
+            "type" : "boolean",
+            "description" : "Allow circular arcs in the output.",
+            "default" : true
+          },
+          "output.curves.allowed.elliptical_arc" : {
+            "type" : "boolean",
+            "description" : "Allow elliptical arcs in the output.",
+            "default" : true
+          },
+          "output.svg.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "svg_1_0", "svg_1_1", "svg_tiny_1_2" ],
+            "description" : "SVG version to declare in the SVG output.",
+            "default" : "svg_1_1"
+          },
+          "output.svg.fixed_size" : {
+            "type" : "boolean",
+            "description" : "Whether to fix the SVG dimensions in the output file.",
+            "default" : false
+          },
+          "output.svg.adobe_compatibility_mode" : {
+            "type" : "boolean",
+            "description" : "Enable Illustrator compatibility by disabling unsupported SVG features.",
+            "default" : false
+          },
+          "output.pdf.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "PDF_1_4" ],
+            "description" : "PDF version to generate for PDF output.",
+            "default" : "PDF_1_4"
+          },
+          "output.pdf.compression_mode" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "None", "Deflate" ],
+            "description" : "Compression method to apply to PDF output streams.",
+            "default" : "Deflate"
+          },
+          "output.eps.version" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "PS_3_0_EPSF_3_0" ],
+            "description" : "EPS format version for EPS output.",
+            "default" : "PS_3_0_EPSF_3_0"
+          },
+          "output.dxf.compatibility_level" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "lines_only", "lines_and_arcs", "lines_arcs_and_splines" ],
+            "description" : "Level of primitive support for DXF output.",
+            "default" : "lines_and_arcs"
+          },
+          "output.bitmap.anti_aliasing_mode" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "anti_aliased", "aliased" ],
+            "description" : "Anti-aliasing mode for bitmap (PNG) output.",
+            "default" : "anti_aliased"
+          },
+          "output.size.scale" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000,
+            "description" : "Overall uniform scaling factor for the output image.",
+            "example" : 1
+          },
+          "output.size.width" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000000000000,
+            "description" : "Output width, in the selected unit (see output.size.unit).",
+            "example" : 100
+          },
+          "output.size.height" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1000000000000,
+            "description" : "Output height, in the selected unit (see output.size.unit).",
+            "example" : 100
+          },
+          "output.size.unit" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "none", "px", "pt", "in", "cm", "mm" ],
+            "description" : "Measurement unit for output dimensions.",
+            "default" : "none"
+          },
+          "output.size.aspect_ratio" : {
+            "type" : "string",
+            "format" : "string",
+            "enum" : [ "preserve_inset", "preserve_overflow", "stretch" ],
+            "description" : "How to preserve or stretch aspect ratio.",
+            "default" : "preserve_inset"
+          },
+          "output.size.align_x" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1,
+            "description" : "Horizontal alignment (0.0 = left, 0.5 = center, 1.0 = right) when aspect ratio is preserved.",
+            "default" : 0.5
+          },
+          "output.size.align_y" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 0,
+            "maximum" : 1,
+            "description" : "Vertical alignment (0.0 = top, 0.5 = center, 1.0 = bottom) when aspect ratio is preserved.",
+            "default" : 0.5
+          },
+          "output.size.input_dpi" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 1,
+            "maximum" : 1000000,
+            "description" : "Override the detected DPI of the input image for size computations.",
+            "example" : 300
+          },
+          "output.size.output_dpi" : {
+            "type" : "number",
+            "format" : "float",
+            "minimum" : 1,
+            "maximum" : 1000000,
+            "description" : "DPI setting for the output image.",
+            "example" : 300
+          }
+        },
+        "required" : [ "image.token" ]
+      },
+      "DeleteImageRequest" : {
+        "type" : "object",
+        "description" : "Multipart form fields for deleting a retained image and result.",
+        "additionalProperties" : false,
+        "properties" : {
+          "image.token" : {
+            "type" : "string",
+            "description" : "Image Token to delete before its retention period expires."
+          }
+        },
+        "required" : [ "image.token" ]
+      },
+      "DeleteImageResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "description" : "Always true when the Image Token has been deleted."
+          }
+        },
+        "required" : [ "success" ]
+      },
+      "AccountStatusResponse" : {
+        "type" : "object",
+        "properties" : {
+          "subscriptionPlan" : {
+            "type" : "string",
+            "description" : "The subscription plan currently associated with the account, or 'none'."
+          },
+          "subscriptionState" : {
+            "type" : "string",
+            "description" : "The current subscription state: 'active', 'pastDue', or 'ended'."
+          },
+          "credits" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "The number of API credits left. Can be fractional, so parse as a double-precision number."
+          }
+        },
+        "required" : [ "subscriptionPlan", "subscriptionState", "credits" ]
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "object",
+            "properties" : {
+              "status" : {
+                "type" : "integer",
+                "format" : "int32"
+              },
+              "code" : {
+                "type" : "integer",
+                "format" : "int32"
+              },
+              "message" : {
+                "type" : "string"
+              }
+            },
+            "required" : [ "status", "code", "message" ]
+          },
+          "dataReceived" : {
+            "description" : "Echo of the submitted request data when available. File uploads are summarized instead of echoed.",
+            "type" : "object",
+            "nullable" : true,
+            "additionalProperties" : true
+          }
+        },
+        "required" : [ "error", "dataReceived" ]
+      }
+    },
+    "securitySchemes" : {
+      "basicAuth" : {
+        "type" : "http",
+        "scheme" : "basic"
+      }
+    }
+  },
+  "security" : [ {
+    "basicAuth" : [ ]
+  } ]
+}

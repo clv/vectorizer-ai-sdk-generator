@@ -1,0 +1,9 @@
+packageName: vectorizer
+moduleName: github.com/clv/vectorizer-go
+packageVersion: 1.0.0
+gitUserId: clv
+gitRepoId: vectorizer-go
+enumClassPrefix: true
+withGoCodegenComment: false
+isGoSubmodule: false
+hideGenerationTimestamp: true

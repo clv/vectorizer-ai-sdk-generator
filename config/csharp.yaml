@@ -1,0 +1,14 @@
+packageName: Vectorizer.AI
+packageVersion: 1.0.0
+targetFramework: netstandard2.0
+optionalAssemblyInfo: false
+useOneOfDiscriminatorLookup: true
+packageCompany: Vectorizer.AI
+packageAuthors: Vectorizer.AI
+packageTags: Vectorizer.AI;image vectorization;SVG;DXF;OpenAPI
+packageDescription: Vectorizer.AI API SDK
+releaseNote: Initial public SDK release.
+repositoryUrl: https://github.com/clv/vectorizer-ai-dotnet
+gitUserId: clv
+gitRepoId: vectorizer-ai-dotnet
+hideGenerationTimestamp: true

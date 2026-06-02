@@ -1,0 +1,9 @@
+openapi-generator-cli-*.jar
+output/
+
+output/typescript/node_modules/
+output/typescript/dist/
+output/typescript/package-lock.json
+
+output/java/.gradle/
+output/java/build/

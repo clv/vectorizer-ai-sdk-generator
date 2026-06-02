@@ -1,0 +1,11 @@
+gemName: vectorizer_ai
+moduleName: VectorizerAI
+gemVersion: 1.0.0
+gemAuthor: Vectorizer.AI
+gemAuthorEmail: support@vectorizer.ai
+gemHomepage: https://vectorizer.ai/api/documentation
+gemSummary: Vectorizer.AI API SDK
+gemDescription: Official Ruby SDK for the Vectorizer.AI image vectorization API.
+gitUserId: clv
+gitRepoId: vectorizer-ai-ruby
+hideGenerationTimestamp: true

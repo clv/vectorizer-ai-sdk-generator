@@ -1,0 +1,22 @@
+library: native
+useRuntimeException: false
+useSingleRequestParameter: true
+useTags: true
+groupId: ai.vectorizer
+artifactId: vectorizer-ai-java
+artifactDescription: Official Java SDK for the Vectorizer.AI image vectorization API.
+artifactUrl: https://github.com/clv/vectorizer-ai-java
+artifactVersion: 1.0.0
+apiPackage: ai.vectorizer.api
+modelPackage: ai.vectorizer.model
+invokerPackage: ai.vectorizer.invoker
+developerName: Vectorizer.AI
+developerEmail: support@vectorizer.ai
+developerOrganization: Vectorizer.AI
+developerOrganizationUrl: https://vectorizer.ai
+scmConnection: scm:git:https://github.com/clv/vectorizer-ai-java.git
+scmDeveloperConnection: scm:git:https://github.com/clv/vectorizer-ai-java.git
+scmUrl: https://github.com/clv/vectorizer-ai-java
+gitUserId: clv
+gitRepoId: vectorizer-ai-java
+hideGenerationTimestamp: true
