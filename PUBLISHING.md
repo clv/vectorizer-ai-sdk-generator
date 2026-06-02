@@ -2,6 +2,8 @@
 
 This repository is the source of truth for regenerating the official Vectorizer.AI API SDKs from the public OpenAPI document.
 
+For first-time registry setup and the current `v1.0.0` release approval checklist, see `REGISTRY_SETUP.md`.
+
 ## Release Process
 
 1. Update the OpenAPI spec in the website/API repo.
