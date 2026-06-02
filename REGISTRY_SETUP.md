@@ -172,7 +172,7 @@ Done:
 - JReleaser is configured with `applyMavenCentralRules: true` and namespace `ai.vectorizer`.
 - GitHub GPG secrets are set in `clv/vectorizer-ai-java`.
 - Public release-signing key is on `hkps://keyserver.ubuntu.com`:
-  - `C637 45D9 0036 BD44 673F 8CE2 EF45 BA8D 761F CF26`
+  - `B025 2785 118E 7994 526A 8CF6 D89B D63D 230C 4F2C`
 - The corrected tag CI build passed:
   - `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708863`
 - The corrected publish workflow is waiting for `maven-central` environment approval:
