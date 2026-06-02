@@ -12,15 +12,14 @@ Done:
 - .NET is published to NuGet as `Vectorizer.AI@1.0.0`.
 - Ruby is published to RubyGems as `vectorizer_ai@1.0.1`. Version `1.0.0` was superseded immediately by `1.0.1` to fix an oversized gem packaging file list.
 - Go is published by Git tag and is available through the Go module proxy.
-- PHP has a GitHub `v1.0.0` release, but still needs Packagist submission before `composer require vectorizer/ai` works.
+- PHP is published to Packagist as `vectorizer/ai@v1.0.0`.
 - CLI `v1.0.0` is released at `https://github.com/clv/vectorizer-ai-cli/releases/tag/v1.0.0`.
 - Java is published to Maven Central as `ai.vectorizer:vectorizer-ai-java:1.0.0`.
 
 Still blocked:
 
 - Python is waiting for PyPI organization approval and trusted-publisher setup.
-- PHP still needs Packagist submission.
-- PyPI and Packagist package-manager URLs currently do not resolve for these package names.
+- The PyPI package-manager URL currently does not resolve for `vectorizer-ai-sdk`.
 
 ## Account Defaults
 
@@ -196,14 +195,14 @@ Official references:
 
 Goal: make `composer require vectorizer/ai` work.
 
-Registry action:
+Done:
 
-- Log in to `https://packagist.org`.
-- Submit the public repository URL:
+- The public repository was submitted:
   - `https://github.com/clv/vectorizer-ai-php`
-- Configure GitHub synchronization so future tags are imported automatically.
-
-No GitHub environment approval is needed; the PHP `v1.0.0` GitHub release already exists.
+- Packagist package page:
+  - `https://packagist.org/packages/vectorizer/ai`
+- GitHub synchronization is configured through an active `push` webhook on `clv/vectorizer-ai-php`.
+- Packagist Composer metadata resolves `v1.0.0` to commit `24a6fe43e0666db50eb36bc93099159247950544`.
 
 Verify:
 
@@ -225,6 +224,5 @@ Official reference:
 Recommended order for fastest deploy confidence:
 
 1. PyPI
-2. Packagist
 
-Maven Central is done. The remaining registry work is PyPI trusted publishing once the organization is approved, plus Packagist submission for PHP.
+Maven Central and Packagist are done. The remaining registry work is PyPI trusted publishing once the organization is approved.
