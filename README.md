@@ -58,6 +58,10 @@ Deeper checks for toolchains available on this machine:
 .\test.ps1 -Deep
 ```
 
+## Publishing
+
+Use [PUBLISHING.md](PUBLISHING.md) for the repeatable SDK release process. Use [REGISTRY_SETUP.md](REGISTRY_SETUP.md) for one-time registry setup status and historical notes.
+
 ## Publishing Names
 
 These package coordinates are what the website documentation expects:
