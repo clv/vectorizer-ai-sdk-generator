@@ -28,12 +28,9 @@ if (!(Test-Path -LiteralPath $Jar)) {
 if (!$SkipFetch) {
     Write-Host "Fetching OpenAPI spec from $SpecUrl"
     if ($SpecUrl -match "^https?://") {
-        & curl.exe -fsSL $SpecUrl -o $SpecFile
+        Invoke-WebRequest -Uri $SpecUrl -OutFile $SpecFile
     } else {
         Copy-Item -LiteralPath $SpecUrl -Destination $SpecFile -Force
-    }
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to fetch OpenAPI spec from $SpecUrl"
     }
 }
 
@@ -90,27 +87,62 @@ $Definitions = [ordered]@{
 }
 
 $OutputRoot = [System.IO.Path]::GetFullPath((Join-Path $Root "output"))
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+function Write-TextFile($Path, $Text) {
+    [System.IO.File]::WriteAllText($Path, $Text, $script:Utf8NoBom)
+}
 
 function Write-JsonFile($Path, $Value) {
     $Json = $Value | ConvertTo-Json -Depth 20
     $Json = $Json.Replace("\u003c", "<").Replace("\u003e", ">").Replace("\u0026", "&")
-    $Json | Set-Content -LiteralPath $Path -Encoding UTF8
+    Write-TextFile $Path $Json
+}
+
+function Update-TextFile($Path, $Replacements) {
+    $Text = Get-Content -LiteralPath $Path -Raw
+    foreach ($Replacement in $Replacements) {
+        $Text = $Text.Replace($Replacement.From, $Replacement.To)
+    }
+    Write-TextFile $Path $Text
 }
 
 function PostProcess-Sdk($Language, $Output) {
+    Copy-Item -LiteralPath (Join-Path $Root "LICENSE") -Destination (Join-Path $Output "LICENSE") -Force
+    @"
+* text=auto eol=lf
+*.bat text eol=crlf
+"@ | ForEach-Object { Write-TextFile (Join-Path $Output ".gitattributes") $_ }
+
     switch ($Language) {
+        "python" {
+            Update-TextFile (Join-Path $Output "pyproject.toml") @(
+                @{ From = 'license = "Proprietary"'; To = 'license = "Apache-2.0"' }
+            )
+            Update-TextFile (Join-Path $Output "setup.py") @(
+                @{ From = 'license="Proprietary"'; To = 'license="Apache-2.0"' }
+            )
+        }
         "typescript" {
             $PackageJson = Join-Path $Output "package.json"
             $Package = Get-Content -LiteralPath $PackageJson -Raw | ConvertFrom-Json
             $Package.description = "Official TypeScript and JavaScript SDK for the Vectorizer.AI image vectorization API"
             $Package.author = "Vectorizer.AI <support@vectorizer.ai>"
+            $Package | Add-Member -NotePropertyName license -NotePropertyValue "Apache-2.0" -Force
             Write-JsonFile $PackageJson $Package
+        }
+        "java" {
+            Update-TextFile (Join-Path $Output "pom.xml") @(
+                @{ From = "<name>Unlicense</name>"; To = "<name>Apache License, Version 2.0</name>" },
+                @{ From = "<url>https://vectorizer.ai/policies/terms</url>"; To = "<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>" }
+            )
         }
         "php" {
             $ComposerJson = Join-Path $Output "composer.json"
             $Composer = Get-Content -LiteralPath $ComposerJson -Raw | ConvertFrom-Json
             $Composer.name = "vectorizer/ai"
             $Composer.description = "Official PHP SDK for the Vectorizer.AI image vectorization API."
+            $Composer.license = "Apache-2.0"
             Write-JsonFile $ComposerJson $Composer
         }
         "csharp" {
@@ -120,7 +152,50 @@ function PostProcess-Sdk($Language, $Output) {
             $PropertyGroup.AssemblyTitle = "Vectorizer.AI API SDK"
             $PropertyGroup.Copyright = "Copyright Vectorizer.AI"
             $PropertyGroup.PackageReleaseNotes = "Initial public SDK release."
+            if ($null -eq $PropertyGroup.PackageLicenseExpression) {
+                $Node = $Project.CreateElement("PackageLicenseExpression")
+                $Node.InnerText = "Apache-2.0"
+                $PropertyGroup.AppendChild($Node) | Out-Null
+            } else {
+                $PropertyGroup.PackageLicenseExpression = "Apache-2.0"
+            }
+            if ($null -eq $PropertyGroup.PackageProjectUrl) {
+                $Node = $Project.CreateElement("PackageProjectUrl")
+                $Node.InnerText = "https://vectorizer.ai/api/documentation#sdks"
+                $PropertyGroup.AppendChild($Node) | Out-Null
+            } else {
+                $PropertyGroup.PackageProjectUrl = "https://vectorizer.ai/api/documentation#sdks"
+            }
+            if ($null -eq $PropertyGroup.PackageReadmeFile) {
+                $Node = $Project.CreateElement("PackageReadmeFile")
+                $Node.InnerText = "README.md"
+                $PropertyGroup.AppendChild($Node) | Out-Null
+            } else {
+                $PropertyGroup.PackageReadmeFile = "README.md"
+            }
+            $HasReadmeItem = $false
+            foreach ($ItemGroup in $Project.Project.ItemGroup) {
+                foreach ($NoneItem in $ItemGroup.None) {
+                    if ($NoneItem.Include -eq "..\..\README.md") {
+                        $HasReadmeItem = $true
+                    }
+                }
+            }
+            if (!$HasReadmeItem) {
+                $ItemGroup = $Project.CreateElement("ItemGroup")
+                $NoneItem = $Project.CreateElement("None")
+                $NoneItem.SetAttribute("Include", "..\..\README.md")
+                $NoneItem.SetAttribute("Pack", "true")
+                $NoneItem.SetAttribute("PackagePath", "\")
+                $ItemGroup.AppendChild($NoneItem) | Out-Null
+                $Project.Project.AppendChild($ItemGroup) | Out-Null
+            }
             $Project.Save($ProjectFile)
+        }
+        "ruby" {
+            Update-TextFile (Join-Path $Output "vectorizer_ai.gemspec") @(
+                @{ From = 's.license     = "Unlicense"'; To = 's.license     = "Apache-2.0"' }
+            )
         }
     }
 

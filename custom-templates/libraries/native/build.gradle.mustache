@@ -36,10 +36,40 @@ tasks.withType(Javadoc).configureEach {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = 'staging'
+            url = layout.buildDirectory.dir('staging-deploy')
+        }
+    }
     publications {
         maven(MavenPublication) {
             artifactId = '{{artifactId}}'
             from components.java
+            pom {
+                name = '{{artifactId}}'
+                description = '{{artifactDescription}}'
+                url = '{{artifactUrl}}'
+                licenses {
+                    license {
+                        name = 'Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        name = '{{developerName}}'
+                        email = '{{developerEmail}}'
+                        organization = '{{developerOrganization}}'
+                        organizationUrl = '{{developerOrganizationUrl}}'
+                    }
+                }
+                scm {
+                    connection = '{{scmConnection}}'
+                    developerConnection = '{{scmDeveloperConnection}}'
+                    url = '{{scmUrl}}'
+                }
+            }
         }
     }
 }
