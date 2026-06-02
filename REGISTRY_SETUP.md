@@ -10,15 +10,16 @@ Done:
 - SDK `v1.0.0` tags are already pushed.
 - JavaScript is published to npm as `@vectorizer-ai/sdk@1.0.0`.
 - .NET is published to NuGet as `Vectorizer.AI@1.0.0`.
+- Ruby is published to RubyGems as `vectorizer_ai@1.0.1`. Version `1.0.0` was superseded immediately by `1.0.1` to fix an oversized gem packaging file list.
 - Go is published by Git tag and is available through the Go module proxy.
 - PHP has a GitHub `v1.0.0` release, but still needs Packagist submission before `composer require vectorizer/ai` works.
 - CLI `v1.0.0` is released at `https://github.com/clv/vectorizer-ai-cli/releases/tag/v1.0.0`.
 
 Still blocked:
 
-- Python, Java, and Ruby publish workflows are waiting for protected GitHub environment approval.
+- Python and Java publish workflows are waiting for protected GitHub environment approval.
 - Do not approve those waiting jobs until the matching registry-side trusted publishing setup below is complete.
-- PyPI, Maven Central, RubyGems, and Packagist package-manager URLs currently do not resolve for these package names.
+- PyPI, Maven Central, and Packagist package-manager URLs currently do not resolve for these package names.
 
 ## Account Defaults
 
@@ -137,19 +138,19 @@ Official reference:
 
 Goal: make `gem install vectorizer_ai` work.
 
-Registry action:
+Done: `vectorizer_ai@1.0.1` is published to RubyGems.
 
-- Log in to `https://rubygems.org`.
-- Configure trusted publishing for gem `vectorizer_ai`.
-- Use these GitHub publisher settings:
-  - Repository owner: `clv`
-  - Repository name: `vectorizer-ai-ruby`
-  - Workflow filename: `publish.yml`
-  - Environment name: `rubygems`
+Done: RubyGems pending trusted publishing was configured with these GitHub publisher settings:
 
-Then approve this waiting GitHub environment job:
+- Repository owner: `clv`
+- Repository name: `vectorizer-ai-ruby`
+- Workflow filename: `publish.yml`
+- Environment name: `rubygems`
+
+Done: the original `1.0.0` job completed, then `1.0.1` was published with a corrected gemspec file list to avoid including CI-installed `vendor/bundle` dependencies:
 
 - `https://github.com/clv/vectorizer-ai-ruby/actions/runs/26796477976`
+- `https://github.com/clv/vectorizer-ai-ruby/actions/runs/26838184485`
 
 Verify:
 
@@ -229,10 +230,7 @@ Official reference:
 Recommended order for fastest deploy confidence:
 
 1. PyPI
-2. npm
-3. RubyGems
-4. Packagist
-5. NuGet
-6. Maven Central
+2. Packagist
+3. Maven Central
 
-NuGet and Maven Central tend to have the most account/namespace friction, so they can run in parallel with the simpler registries if time matters.
+Maven Central tends to have the most account/namespace friction, so it can run in parallel with the simpler registries if time matters.
