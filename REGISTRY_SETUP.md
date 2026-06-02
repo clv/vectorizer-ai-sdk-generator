@@ -1,16 +1,32 @@
 # Registry Setup Runbook
 
-This file records the registry-side setup needed to publish the official Vectorizer.AI SDKs. The SDK repositories and `v1.0.0` tags already exist; the package registries still need account/namespace setup before the waiting GitHub Actions jobs should be approved.
+This is the current release checklist for the official Vectorizer.AI SDKs and CLI.
+
+## Current State
+
+Done:
+
+- SDK repositories exist under `https://github.com/clv`.
+- SDK `v1.0.0` tags are already pushed.
+- Go is published by Git tag and is available through the Go module proxy.
+- PHP has a GitHub `v1.0.0` release, but still needs Packagist submission before `composer require vectorizer/ai` works.
+- CLI `v1.0.0` is released at `https://github.com/clv/vectorizer-ai-cli/releases/tag/v1.0.0`.
+
+Still blocked:
+
+- Python, JavaScript, Java, .NET, and Ruby publish workflows are waiting for protected GitHub environment approval.
+- Do not approve those waiting jobs until the matching registry-side trusted publishing setup below is complete.
+- PyPI, npm, NuGet, Maven Central, RubyGems, and Packagist package-manager URLs currently do not resolve for these package names.
 
 ## Account Defaults
 
 - Owner/company: Cedar Lake Ventures, Inc.
 - Public product name: Vectorizer.AI
 - Contact email: james@cedarlakeventures.com
-- Website: https://vectorizer.ai
-- GitHub owner: clv
+- Website: `https://vectorizer.ai`
+- GitHub owner: `clv`
 
-Do not use tax or billing details unless a registry explicitly requires them. Do not approve a protected GitHub publish environment until the matching registry setup below is complete.
+Use company-controlled registry accounts where possible. Do not use tax or billing details unless a registry explicitly requires them.
 
 ## Package Coordinates
 
@@ -23,119 +39,196 @@ Do not use tax or billing details unless a registry explicitly requires them. Do
 | Go | Go module proxy | `github.com/clv/vectorizer-go` |
 | PHP | Packagist | `vectorizer/ai` |
 | Ruby | RubyGems | `vectorizer_ai` |
+| CLI | GitHub Releases | `vectorizer` |
 
-## Current Release State
+## James Action Checklist
 
-- `v1.0.0` tags have been pushed for all SDK repositories.
-- Go is already discoverable through the Go module proxy.
-- PHP has a GitHub release, but is not Composer-installable until the Packagist package is submitted.
-- Python, JavaScript, Java, .NET, and Ruby publish jobs are waiting for GitHub environment approval.
+### 1. PyPI
 
-Waiting publish jobs:
+Goal: make `pip install vectorizer-ai-sdk` work.
 
-| SDK | Waiting Job |
-| --- | --- |
-| Python | https://github.com/clv/vectorizer-ai-python/actions/runs/26796477737 |
-| TypeScript / JavaScript | https://github.com/clv/vectorizer-ai-js/actions/runs/26796477833 |
-| Java | https://github.com/clv/vectorizer-ai-java/actions/runs/26796477798 |
-| .NET | https://github.com/clv/vectorizer-ai-dotnet/actions/runs/26796477892 |
-| Ruby | https://github.com/clv/vectorizer-ai-ruby/actions/runs/26796477976 |
+Registry action:
 
-## PyPI
+- Log in to `https://pypi.org`.
+- Create a pending trusted publisher for project `vectorizer-ai-sdk`.
+- Use these GitHub publisher settings:
+  - Owner: `clv`
+  - Repository name: `vectorizer-ai-python`
+  - Workflow filename: `publish.yml`
+  - Environment name: `pypi`
 
-Package: `vectorizer-ai-sdk`
+Then approve this waiting GitHub environment job:
 
-Configure a pending trusted publisher:
+- `https://github.com/clv/vectorizer-ai-python/actions/runs/26796477737`
 
-- Owner: `clv`
-- Repository name: `vectorizer-ai-python`
-- Workflow filename: `publish.yml`
-- Environment name: `pypi`
+Verify:
 
-After setup, approve the waiting `pypi` GitHub environment job. It will publish the wheel and sdist for `vectorizer-ai-sdk` and then create the GitHub release.
+- `https://pypi.org/project/vectorizer-ai-sdk/`
+- `pip install vectorizer-ai-sdk`
 
-## npm
+Official reference:
 
-Package: `@vectorizer-ai/sdk`
+- `https://docs.pypi.org/trusted-publishers/using-a-publisher/`
 
-Create or configure the npm scope:
+### 2. npm
 
-- Scope: `@vectorizer-ai`
-- Package: `sdk`
+Goal: make `npm install @vectorizer-ai/sdk` work.
 
-Configure trusted publishing:
+Registry action:
 
-- GitHub owner: `clv`
-- Repository: `vectorizer-ai-js`
-- Workflow filename: `publish.yml`
-- Environment name: `npm`
-- Allowed action: `npm publish`
+- Log in to `https://www.npmjs.com`.
+- Create or claim the npm org/scope `@vectorizer-ai`.
+- Configure trusted publishing for package `@vectorizer-ai/sdk`.
+- Use these GitHub publisher settings:
+  - Owner: `clv`
+  - Repository name: `vectorizer-ai-js`
+  - Workflow filename: `publish.yml`
+  - Environment name: `npm`
 
-After setup, approve the waiting `npm` GitHub environment job.
+Then approve this waiting GitHub environment job:
 
-## NuGet
+- `https://github.com/clv/vectorizer-ai-js/actions/runs/26796477833`
 
-Package: `Vectorizer.AI`
+Verify:
 
-Configure NuGet trusted publishing for:
+- `https://www.npmjs.com/package/@vectorizer-ai/sdk`
+- `npm install @vectorizer-ai/sdk`
 
-- Repository owner: `clv`
-- Repository name: `vectorizer-ai-dotnet`
-- Workflow filename: `publish.yml`
-- Environment name: `nuget`
+Official reference:
 
-Set this GitHub Actions secret in `clv/vectorizer-ai-dotnet`:
+- `https://docs.npmjs.com/trusted-publishers/`
 
-- `NUGET_USER`: the NuGet account or organization name that will own `Vectorizer.AI`
+### 3. NuGet
 
-After setup, approve the waiting `nuget` GitHub environment job.
+Goal: make `dotnet add package Vectorizer.AI` work.
 
-## RubyGems
+Registry action:
 
-Gem: `vectorizer_ai`
+- Log in to `https://www.nuget.org`.
+- Configure trusted publishing for package `Vectorizer.AI`.
+- Use these GitHub publisher settings:
+  - Repository owner: `clv`
+  - Repository name: `vectorizer-ai-dotnet`
+  - Workflow filename: `publish.yml`
+  - Environment name: `nuget`
 
-Configure trusted publishing:
+GitHub secret action:
 
-- Repository owner: `clv`
-- Repository name: `vectorizer-ai-ruby`
-- Workflow filename: `publish.yml`
-- Environment name: `rubygems`
+- In `clv/vectorizer-ai-dotnet`, set repository secret `NUGET_USER` to the NuGet account or organization name that will own `Vectorizer.AI`.
 
-After setup, approve the waiting `rubygems` GitHub environment job.
+Then approve this waiting GitHub environment job:
 
-## Maven Central
+- `https://github.com/clv/vectorizer-ai-dotnet/actions/runs/26796477892`
 
-Coordinates: `ai.vectorizer:vectorizer-ai-java`
+Verify:
 
-Create or verify the Maven Central namespace:
+- `https://www.nuget.org/packages/Vectorizer.AI`
+- `dotnet add package Vectorizer.AI`
 
-- Namespace: `ai.vectorizer`
-- Domain ownership likely requires control of `vectorizer.ai` DNS.
+Official reference:
 
-Add these GitHub Actions secrets in `clv/vectorizer-ai-java`:
+- `https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing`
 
-- `JRELEASER_MAVENCENTRAL_SONATYPE_USERNAME`
-- `JRELEASER_MAVENCENTRAL_SONATYPE_PASSWORD`
-- `JRELEASER_GPG_PUBLIC_KEY`
-- `JRELEASER_GPG_SECRET_KEY`
-- `JRELEASER_GPG_PASSPHRASE`
+### 4. RubyGems
 
-Generate a dedicated release-signing GPG key if there is no existing company publishing key. After namespace verification and secrets are configured, approve the waiting `maven-central` GitHub environment job.
+Goal: make `gem install vectorizer_ai` work.
 
-## Packagist
+Registry action:
 
-Package: `vectorizer/ai`
+- Log in to `https://rubygems.org`.
+- Configure trusted publishing for gem `vectorizer_ai`.
+- Use these GitHub publisher settings:
+  - Repository owner: `clv`
+  - Repository name: `vectorizer-ai-ruby`
+  - Workflow filename: `publish.yml`
+  - Environment name: `rubygems`
 
-Submit this repository:
+Then approve this waiting GitHub environment job:
 
-- https://github.com/clv/vectorizer-ai-php
+- `https://github.com/clv/vectorizer-ai-ruby/actions/runs/26796477976`
 
-Configure GitHub synchronization so future tags are imported automatically. The `v1.0.0` GitHub release already exists; Packagist should ingest that tag once the package is submitted.
+Verify:
 
-## Release Approval Order
+- `https://rubygems.org/gems/vectorizer_ai`
+- `gem install vectorizer_ai`
 
-1. Configure each registry entry.
-2. Confirm the package name is owned by the correct account or organization.
-3. Approve the matching waiting GitHub environment job.
-4. Confirm the package appears in the registry.
-5. Only then announce the SDK publicly.
+Official reference:
+
+- `https://guides.rubygems.org/trusted-publishing/`
+
+### 5. Maven Central
+
+Goal: make `ai.vectorizer:vectorizer-ai-java:1.0.0` work.
+
+Registry action:
+
+- Log in to `https://central.sonatype.com`.
+- Create or verify the namespace `ai.vectorizer`.
+- Complete the domain ownership verification for `vectorizer.ai` when Sonatype provides the required verification step.
+
+GitHub secret action:
+
+- In `clv/vectorizer-ai-java`, add these repository secrets:
+  - `JRELEASER_MAVENCENTRAL_SONATYPE_USERNAME`
+  - `JRELEASER_MAVENCENTRAL_SONATYPE_PASSWORD`
+  - `JRELEASER_GPG_PUBLIC_KEY`
+  - `JRELEASER_GPG_SECRET_KEY`
+  - `JRELEASER_GPG_PASSPHRASE`
+
+Use a dedicated company release-signing GPG key if there is no existing Cedar Lake Ventures publishing key.
+
+Then approve this waiting GitHub environment job:
+
+- `https://github.com/clv/vectorizer-ai-java/actions/runs/26796477798`
+
+Verify:
+
+- `https://central.sonatype.com/artifact/ai.vectorizer/vectorizer-ai-java`
+- Maven/Gradle can resolve `ai.vectorizer:vectorizer-ai-java:1.0.0`.
+
+Official references:
+
+- `https://central.sonatype.org/register/namespace/`
+- `https://central.sonatype.org/register/central-portal/`
+- `https://jreleaser.org/guide/latest/continuous-integration/github-actions.html`
+
+### 6. Packagist
+
+Goal: make `composer require vectorizer/ai` work.
+
+Registry action:
+
+- Log in to `https://packagist.org`.
+- Submit the public repository URL:
+  - `https://github.com/clv/vectorizer-ai-php`
+- Configure GitHub synchronization so future tags are imported automatically.
+
+No GitHub environment approval is needed; the PHP `v1.0.0` GitHub release already exists.
+
+Verify:
+
+- `https://packagist.org/packages/vectorizer/ai`
+- `composer require vectorizer/ai`
+
+Official reference:
+
+- `https://packagist.org/about`
+
+## Approval Order
+
+1. Complete one registry setup item.
+2. Approve only that registry's waiting GitHub environment job.
+3. Wait for the job to finish.
+4. Confirm the package appears in the registry and can be installed.
+5. Move to the next registry.
+
+Recommended order for fastest deploy confidence:
+
+1. PyPI
+2. npm
+3. RubyGems
+4. Packagist
+5. NuGet
+6. Maven Central
+
+NuGet and Maven Central tend to have the most account/namespace friction, so they can run in parallel with the simpler registries if time matters.
