@@ -107,6 +107,12 @@ function Update-TextFile($Path, $Replacements) {
     Write-TextFile $Path $Text
 }
 
+function Update-TextFileRegex($Path, $Pattern, $Replacement) {
+    $Text = Get-Content -LiteralPath $Path -Raw
+    $Text = [regex]::Replace($Text, $Pattern, $Replacement)
+    Write-TextFile $Path $Text
+}
+
 function PostProcess-Sdk($Language, $Output) {
     Copy-Item -LiteralPath (Join-Path $Root "LICENSE") -Destination (Join-Path $Output "LICENSE") -Force
     @"
@@ -134,9 +140,21 @@ function PostProcess-Sdk($Language, $Output) {
             Write-JsonFile $PackageJson $Package
         }
         "java" {
-            Update-TextFile (Join-Path $Output "pom.xml") @(
+            $PomFile = Join-Path $Output "pom.xml"
+            $PomText = Get-Content -LiteralPath $PomFile -Raw
+            $PomText = [regex]::Replace($PomText, "(?m)^    <version>[^<]+</version>", "    <version>$Version</version>", 1)
+            Write-TextFile $PomFile $PomText
+            Update-TextFile $PomFile @(
                 @{ From = "<name>Unlicense</name>"; To = "<name>Apache License, Version 2.0</name>" },
                 @{ From = "<url>https://vectorizer.ai/policies/terms</url>"; To = "<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>" }
+            )
+            Update-TextFile (Join-Path $Output "build.gradle") @(
+                @{ From = "version = '1.0.0'"; To = "version = '$Version'" }
+            )
+            Update-TextFile (Join-Path $Output "README.md") @(
+                @{ From = "<version>1.0.0</version>"; To = "<version>$Version</version>" },
+                @{ From = "ai.vectorizer:vectorizer-ai-java:1.0.0"; To = "ai.vectorizer:vectorizer-ai-java:$Version" },
+                @{ From = "vectorizer-ai-java-1.0.0.jar"; To = "vectorizer-ai-java-$Version.jar" }
             )
         }
         "php" {
@@ -147,6 +165,8 @@ function PostProcess-Sdk($Language, $Output) {
             $Composer.license = "Apache-2.0"
             $Composer.PSObject.Properties.Remove("version")
             Write-JsonFile $ComposerJson $Composer
+            Update-TextFileRegex (Join-Path $Output "lib/HeaderSelector.php") "(?s)if \(![$]isMultipart\) \{\s+if\([$]contentType === ''\) \{\s+[$]contentType = 'application/json';\s+\}\s+[$]headers\['Content-Type'\] = [$]contentType;\s+\}" "if (!`$isMultipart && `$contentType !== '') {`n            `$headers['Content-Type'] = `$contentType;`n        }"
+            Update-TextFileRegex (Join-Path $Output "lib/Api/AccountApi.php") "'getAccountStatus'\s*=>\s*\[\s*'application/json',\s*\]," "'getAccountStatus' => [`n            '',`n        ],"
         }
         "csharp" {
             $ProjectFile = Join-Path $Output "src/Vectorizer.AI/Vectorizer.AI.csproj"
@@ -196,9 +216,31 @@ function PostProcess-Sdk($Language, $Output) {
             $Project.Save($ProjectFile)
         }
         "ruby" {
-            Update-TextFile (Join-Path $Output "vectorizer_ai.gemspec") @(
+            $GemspecFile = Join-Path $Output "vectorizer_ai.gemspec"
+            Update-TextFile $GemspecFile @(
                 @{ From = 's.license     = "Unlicense"'; To = 's.license     = "Apache-2.0"' }
             )
+            $RubyMetadata = @'
+s.metadata    = {
+    "source_code_uri" => "https://github.com/clv/vectorizer-ai-ruby",
+    "documentation_uri" => "https://vectorizer.ai/api/documentation",
+    "changelog_uri" => "https://github.com/clv/vectorizer-ai-ruby/releases",
+    "rubygems_mfa_required" => "true"
+  }
+'@
+            Update-TextFileRegex $GemspecFile 's\.metadata\s*=\s*\{\}' $RubyMetadata
+            $RubyFileList = @'
+  s.files         = [
+    "Gemfile",
+    "LICENSE",
+    "README.md",
+    "Rakefile",
+    "vectorizer_ai.gemspec"
+  ] + Dir.glob("docs/**/*.md") + Dir.glob("lib/**/*.rb")
+  s.test_files    = Dir.glob("spec/**/*.rb")
+'@
+            Update-TextFileRegex $GemspecFile '(?s)  s\.files\s*=.*?  s\.test_files\s*=.*?\r?\n' ($RubyFileList + "`n")
+            Update-TextFileRegex (Join-Path $Output "lib/vectorizer_ai/api_client.rb") "\s*'Content-Type' => 'application/json',\r?\n" "`n"
         }
     }
 
