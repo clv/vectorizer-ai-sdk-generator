@@ -8,15 +8,17 @@ Done:
 
 - SDK repositories exist under `https://github.com/clv`.
 - SDK `v1.0.0` tags are already pushed.
+- JavaScript is published to npm as `@vectorizer-ai/sdk@1.0.0`.
+- .NET is published to NuGet as `Vectorizer.AI@1.0.0`.
 - Go is published by Git tag and is available through the Go module proxy.
 - PHP has a GitHub `v1.0.0` release, but still needs Packagist submission before `composer require vectorizer/ai` works.
 - CLI `v1.0.0` is released at `https://github.com/clv/vectorizer-ai-cli/releases/tag/v1.0.0`.
 
 Still blocked:
 
-- Python, Java, .NET, and Ruby publish workflows are waiting for protected GitHub environment approval.
+- Python, Java, and Ruby publish workflows are waiting for protected GitHub environment approval.
 - Do not approve those waiting jobs until the matching registry-side trusted publishing setup below is complete.
-- PyPI, npm, NuGet, Maven Central, RubyGems, and Packagist package-manager URLs currently do not resolve for these package names.
+- PyPI, Maven Central, RubyGems, and Packagist package-manager URLs currently do not resolve for these package names.
 
 ## Account Defaults
 
@@ -74,6 +76,8 @@ Official reference:
 
 Goal: make `npm install @vectorizer-ai/sdk` work.
 
+Done: `@vectorizer-ai/sdk@1.0.0` is published and verified installable.
+
 Registry action:
 
 - Log in to `https://www.npmjs.com`.
@@ -85,9 +89,7 @@ Registry action:
   - Workflow filename: `publish.yml`
   - Environment name: `npm`
 
-Then approve this waiting GitHub environment job:
-
-- `https://github.com/clv/vectorizer-ai-js/actions/runs/26796477833`
+The original waiting GitHub environment job was cancelled because `1.0.0` was manually bootstrapped before trusted publishing was configured.
 
 Verify:
 
@@ -101,6 +103,8 @@ Official reference:
 ### 3. NuGet
 
 Goal: make `dotnet add package Vectorizer.AI` work.
+
+Done: `Vectorizer.AI@1.0.0` is published to NuGet and verified installable.
 
 Registry action:
 
@@ -116,7 +120,7 @@ GitHub secret action:
 
 - Done: in `clv/vectorizer-ai-dotnet`, repository secret `NUGET_USER` is set to `jamesd_clv`.
 
-Then approve this waiting GitHub environment job:
+Done: the corrected GitHub environment job was approved and completed:
 
 - `https://github.com/clv/vectorizer-ai-dotnet/actions/runs/26837289941`
 
