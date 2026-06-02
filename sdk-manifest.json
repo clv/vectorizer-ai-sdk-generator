@@ -8,8 +8,8 @@
     {
       "id": "python",
       "label": "Python",
-      "package": "vectorizer-ai",
-      "install": "pip install vectorizer-ai",
+      "package": "vectorizer-ai-sdk",
+      "install": "pip install vectorizer-ai-sdk",
       "output": "output/python"
     },
     {

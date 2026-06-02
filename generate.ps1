@@ -117,9 +117,11 @@ function PostProcess-Sdk($Language, $Output) {
     switch ($Language) {
         "python" {
             Update-TextFile (Join-Path $Output "pyproject.toml") @(
+                @{ From = 'name = "vectorizer_ai"'; To = 'name = "vectorizer-ai-sdk"' },
                 @{ From = 'license = "Proprietary"'; To = 'license = "Apache-2.0"' }
             )
             Update-TextFile (Join-Path $Output "setup.py") @(
+                @{ From = 'NAME = "vectorizer-ai"'; To = 'NAME = "vectorizer-ai-sdk"' },
                 @{ From = 'license="Proprietary"'; To = 'license="Apache-2.0"' }
             )
         }

@@ -64,7 +64,7 @@ These package coordinates are what the website documentation expects:
 
 | Language | Package |
 | --- | --- |
-| Python | `vectorizer-ai` |
+| Python | `vectorizer-ai-sdk` |
 | TypeScript | `@vectorizer-ai/sdk` |
 | Java | `ai.vectorizer:vectorizer-ai-java` |
 | C# | `Vectorizer.AI` |
