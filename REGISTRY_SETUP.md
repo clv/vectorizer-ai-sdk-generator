@@ -14,7 +14,7 @@ Done:
 
 Still blocked:
 
-- Python, JavaScript, Java, .NET, and Ruby publish workflows are waiting for protected GitHub environment approval.
+- Python, Java, .NET, and Ruby publish workflows are waiting for protected GitHub environment approval.
 - Do not approve those waiting jobs until the matching registry-side trusted publishing setup below is complete.
 - PyPI, npm, NuGet, Maven Central, RubyGems, and Packagist package-manager URLs currently do not resolve for these package names.
 
@@ -114,11 +114,11 @@ Registry action:
 
 GitHub secret action:
 
-- In `clv/vectorizer-ai-dotnet`, set repository secret `NUGET_USER` to the NuGet account or organization name that will own `Vectorizer.AI`.
+- Done: in `clv/vectorizer-ai-dotnet`, repository secret `NUGET_USER` is set to `jamesd_clv`.
 
 Then approve this waiting GitHub environment job:
 
-- `https://github.com/clv/vectorizer-ai-dotnet/actions/runs/26796477892`
+- `https://github.com/clv/vectorizer-ai-dotnet/actions/runs/26837289941`
 
 Verify:
 
