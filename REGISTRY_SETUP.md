@@ -165,26 +165,39 @@ Official reference:
 
 Goal: make `ai.vectorizer:vectorizer-ai-java:1.0.0` work.
 
+Done:
+
+- Java SDK `main` and tag `v1.0.0` were moved to the Maven Central-ready commit.
+- Gradle publication now includes main, sources, and Javadocs artifacts.
+- JReleaser is configured with `applyMavenCentralRules: true` and namespace `ai.vectorizer`.
+- GitHub GPG secrets are set in `clv/vectorizer-ai-java`.
+- Public release-signing key is on `hkps://keyserver.ubuntu.com`:
+  - `FE76 CF68 4D9F D0A5 C7DC 9321 ABDB 18CE AC1F DC96`
+- The corrected tag CI build passed:
+  - `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708863`
+- The corrected publish workflow is waiting for `maven-central` environment approval:
+  - `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708783`
+
 Registry action:
 
 - Log in to `https://central.sonatype.com`.
 - Create or verify the namespace `ai.vectorizer`.
 - Complete the domain ownership verification for `vectorizer.ai` when Sonatype provides the required verification step.
+- Generate a Central Portal user token.
 
 GitHub secret action:
 
-- In `clv/vectorizer-ai-java`, add these repository secrets:
-  - `JRELEASER_MAVENCENTRAL_SONATYPE_USERNAME`
-  - `JRELEASER_MAVENCENTRAL_SONATYPE_PASSWORD`
+- Done: in `clv/vectorizer-ai-java`, add these repository secrets:
   - `JRELEASER_GPG_PUBLIC_KEY`
   - `JRELEASER_GPG_SECRET_KEY`
   - `JRELEASER_GPG_PASSPHRASE`
-
-Use a dedicated company release-signing GPG key if there is no existing Cedar Lake Ventures publishing key.
+- Still needed: in `clv/vectorizer-ai-java`, add these repository secrets from the Central Portal user token:
+  - `JRELEASER_MAVENCENTRAL_SONATYPE_USERNAME`
+  - `JRELEASER_MAVENCENTRAL_SONATYPE_PASSWORD`
 
 Then approve this waiting GitHub environment job:
 
-- `https://github.com/clv/vectorizer-ai-java/actions/runs/26796477798`
+- `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708783`
 
 Verify:
 
