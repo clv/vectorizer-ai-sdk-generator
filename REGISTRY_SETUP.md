@@ -14,12 +14,13 @@ Done:
 - Go is published by Git tag and is available through the Go module proxy.
 - PHP has a GitHub `v1.0.0` release, but still needs Packagist submission before `composer require vectorizer/ai` works.
 - CLI `v1.0.0` is released at `https://github.com/clv/vectorizer-ai-cli/releases/tag/v1.0.0`.
+- Java is published to Maven Central as `ai.vectorizer:vectorizer-ai-java:1.0.0`.
 
 Still blocked:
 
-- Python and Java publish workflows are waiting for protected GitHub environment approval.
-- Do not approve those waiting jobs until the matching registry-side trusted publishing setup below is complete.
-- PyPI, Maven Central, and Packagist package-manager URLs currently do not resolve for these package names.
+- Python is waiting for PyPI organization approval and trusted-publisher setup.
+- PHP still needs Packagist submission.
+- PyPI and Packagist package-manager URLs currently do not resolve for these package names.
 
 ## Account Defaults
 
@@ -167,37 +168,17 @@ Goal: make `ai.vectorizer:vectorizer-ai-java:1.0.0` work.
 
 Done:
 
-- Java SDK `main` and tag `v1.0.0` were moved to the Maven Central-ready commit.
+- Java SDK `main` and tag `v1.0.0` were moved to the Maven Central-published commit.
 - Gradle publication now includes main, sources, and Javadocs artifacts.
-- JReleaser is configured with `applyMavenCentralRules: true` and namespace `ai.vectorizer`.
-- GitHub GPG secrets are set in `clv/vectorizer-ai-java`.
+- JReleaser is configured with `applyMavenCentralRules: true`, namespace `ai.vectorizer`, and bearer-token authorization for the Central Portal Publisher API.
+- GitHub GPG and Maven Central token secrets are set in `clv/vectorizer-ai-java`.
 - Public release-signing key is on `hkps://keyserver.ubuntu.com`:
   - `B025 2785 118E 7994 526A 8CF6 D89B D63D 230C 4F2C`
-- The corrected tag CI build passed:
-  - `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708863`
-- The corrected publish workflow is waiting for `maven-central` environment approval:
-  - `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708783`
-
-Registry action:
-
-- Log in to `https://central.sonatype.com`.
-- Create or verify the namespace `ai.vectorizer`.
-- Complete the domain ownership verification for `vectorizer.ai` when Sonatype provides the required verification step.
-- Generate a Central Portal user token.
-
-GitHub secret action:
-
-- Done: in `clv/vectorizer-ai-java`, add these repository secrets:
-  - `JRELEASER_GPG_PUBLIC_KEY`
-  - `JRELEASER_GPG_SECRET_KEY`
-  - `JRELEASER_GPG_PASSPHRASE`
-- Still needed: in `clv/vectorizer-ai-java`, add these repository secrets from the Central Portal user token:
-  - `JRELEASER_MAVENCENTRAL_SONATYPE_USERNAME`
-  - `JRELEASER_MAVENCENTRAL_SONATYPE_PASSWORD`
-
-Then approve this waiting GitHub environment job:
-
-- `https://github.com/clv/vectorizer-ai-java/actions/runs/26838708783`
+- The corrected publish workflow completed:
+  - `https://github.com/clv/vectorizer-ai-java/actions/runs/26841248695`
+- The GitHub release was created:
+  - `https://github.com/clv/vectorizer-ai-java/releases/tag/v1.0.0`
+- The artifact resolves from Maven Central with Gradle.
 
 Verify:
 
@@ -208,6 +189,7 @@ Official references:
 
 - `https://central.sonatype.org/register/namespace/`
 - `https://central.sonatype.org/register/central-portal/`
+- `https://central.sonatype.org/publish/publish-portal-api/`
 - `https://jreleaser.org/guide/latest/continuous-integration/github-actions.html`
 
 ### 6. Packagist
@@ -244,6 +226,5 @@ Recommended order for fastest deploy confidence:
 
 1. PyPI
 2. Packagist
-3. Maven Central
 
-Maven Central tends to have the most account/namespace friction, so it can run in parallel with the simpler registries if time matters.
+Maven Central is done. The remaining registry work is PyPI trusted publishing once the organization is approved, plus Packagist submission for PHP.
